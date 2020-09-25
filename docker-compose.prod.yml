@@ -1,0 +1,11 @@
+version: "3"
+services: 
+  api:
+    command: npm run start
+    container_name: projectmanagment
+    build: './api'
+    ports: 
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    restart: always

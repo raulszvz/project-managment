@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width" />
+  <title>Project Managment</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.0/css/bulma.min.css">
+</head>
+<body onload="main()">
+  <section class="hero is-light is-fullheight">
+    <div class="hero-body">
+      <div class="container" id="login">
+        <div class="columns is-vcentered">
+          <div class="column is-4 is-offset-4">
+            <div class="container">
+              <div class="box">
+                <form id="loginForm">
+                  <div class="field">
+                    <div class="control">
+                      <label class="label">Email</label>
+                      <div class="control">
+                        <input class="input" type="Email" id="email" name="email" placeholder="Email" />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <div class="control">
+                      <label class="label">Contraseña</label>
+                      <div class="control">
+                        <input class="input" type="Password" id="pass" name="pass" placeholder="Contraseña" />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <div class="control">
+                      <button class="button is-primary is-fullwidth" type="submit">
+                        Ingresar
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="container" id="projectBoard"></div>
+      <div class="container" id="deliveryBoard"></div>
+    </div>
+  </section>
+  <script>
+    //Referencias
+    // https://medium.com/walmartglobaltech/writing-a-graphql-client-in-vanilla-js-d2a09aee7c6c
+    // https://gist.github.com/yusinto/30bba51b6f903c1b67e0383f4a288269
+
+    const graphlEndpoint = `https://kingston-api.herokuapp.com/graphql`;
+    const formLogin = document.querySelector("#loginForm");
+    const projectBoard = document.querySelector("#projectBoard");
+    const deliveryBoard = document.querySelector("#deliveryBoard");
+
+    function main() {
+      document.getElementById("projectBoard").style.display = "none";
+      document.getElementById("deliveryBoard").style.display = "none";
+    }
+
+    function renderProjects() {
+      const codeHTML = '<div class="columns"><div class="column is-6 is-offset-3"><div class="box"><p>Agregar proyecto</p></div><div class="container pb-2"><div class="box"><strong>Titulo</strong><p>Descripcion</p><div class="buttons py-3"><button class="button is-small is-primary">Editar</button><button class="button is-small is-primary">Eliminar</button></div></div></div></div></div>';
+      document.getElementById("login").style.display = "none";
+      document.getElementById("projectBoard").style.display = "inline";
+      document.getElementById('projectBoard').innerHTML = codeHTML;
+    }
+
+    function renderDeliverys() {
+      const codeHTML = '<div class="columns"><div class="column is-6 is-offset-3"><div class="box"><p>Agregar entrega</p></div><div class="container pb-2"><div class="box"><strong>Titulo</strong><p>Descripcion</p><div class="buttons py-3"><button class="button is-small is-primary">Editar</button><button class="button is-small is-primary">Eliminar</button></div></div></div></div></div>';
+      document.getElementById("login").style.display = "none";
+      document.getElementById("projectBoard").style.display = "none";
+      document.getElementById("projectBoard").style.display = "inline";
+      document.getElementById('projectBoard').innerHTML = codeHTML;
+    }
+
+    const login = async (ev) => {
+      ev.preventDefault();
+      const email = formLogin.elements["email"].value;
+      const pass = formLogin.elements["pass"].value;
+      console.log(email, pass);
+
+      const query = JSON.stringify({
+        query: `query {
+        Proyecto(id:${pass})
+        {id,titulo}
+      }`
+      });
+
+      const response = await fetch(graphlEndpoint, {
+        headers: { 'content-type': 'application/json' },
+        method: 'POST',
+        body: query,
+      });
+
+      const responseJson = await response.json();
+      renderProjects();
+      //console.log(responseJson.data);
+
+      //form.reset();
+    }
+
+    formLogin.addEventListener("submit", login);
+  </script>
+  <!--<script src="script.js"></script>-->
+</body>
+
+</html>
