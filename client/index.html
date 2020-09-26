@@ -52,8 +52,10 @@
     //Referencias
     // https://medium.com/walmartglobaltech/writing-a-graphql-client-in-vanilla-js-d2a09aee7c6c
     // https://gist.github.com/yusinto/30bba51b6f903c1b67e0383f4a288269
+    // https://www.youtube.com/watch?v=V1Zz2fUuaXI
 
-    const graphlEndpoint = `https://kingston-api.herokuapp.com/graphql`;
+    const graphlEndpoint = `https://vukapi.herokuapp.com/`;
+    
     const formLogin = document.querySelector("#loginForm");
     const projectBoard = document.querySelector("#projectBoard");
     const deliveryBoard = document.querySelector("#deliveryBoard");
@@ -63,44 +65,98 @@
       document.getElementById("deliveryBoard").style.display = "none";
     }
 
-    function renderProjects() {
-      const codeHTML = '<div class="columns"><div class="column is-6 is-offset-3"><div class="box"><p>Agregar proyecto</p></div><div class="container pb-2"><div class="box"><strong>Titulo</strong><p>Descripcion</p><div class="buttons py-3"><button class="button is-small is-primary">Editar</button><button class="button is-small is-primary">Eliminar</button></div></div></div></div></div>';
+    async function renderProjects(user) {
+      let projects = await readProjects(user.id);
+      console.log(projects);
+      const first = '<div class="columns"><div class="column is-6 is-offset-3"><div class="box"><p>Agregar proyecto</p></div>';
+      let middle = "";
+      const last = '</div></div>';
+      console.log(projects.length)
+      for(i=0; i<projects.length; i++){
+        middle += '<div class="container pb-2" onclick="renderDeliverys('+projects[i].id+')"><div class="box"><strong>'+projects[i].titulo+'</strong><p>'+projects[i].descripcion+'</p><div class="buttons py-3"><button class="button is-small is-primary">Editar</button><button class="button is-small is-primary">Eliminar</button></div></div></div>';
+      }
+      let code = first + middle + last
       document.getElementById("login").style.display = "none";
       document.getElementById("projectBoard").style.display = "inline";
-      document.getElementById('projectBoard').innerHTML = codeHTML;
+      document.getElementById('projectBoard').innerHTML = code;
     }
 
-    function renderDeliverys() {
-      const codeHTML = '<div class="columns"><div class="column is-6 is-offset-3"><div class="box"><p>Agregar entrega</p></div><div class="container pb-2"><div class="box"><strong>Titulo</strong><p>Descripcion</p><div class="buttons py-3"><button class="button is-small is-primary">Editar</button><button class="button is-small is-primary">Eliminar</button></div></div></div></div></div>';
+    async function renderDeliverys(project) {
+      let deliverys = await readDelivery(project);
+      const first = '<div class="columns"><div class="column is-6 is-offset-3"><div class="box"><p>Agregar entrega</p></div>';
+      let middle = "";
+      const last = '</div></div>';
+      console.log(deliverys.length)
+      for(i=0; i<deliverys.length; i++){
+        middle += '<div class="container pb-2"><div class="box"><strong>No. Entrega: '+deliverys[i].numEntrega+'</strong><p>'+deliverys[i].descripcion+'</p><div class="buttons py-3"><button class="button is-small is-primary">Editar</button><button class="button is-small is-primary">Eliminar</button></div></div></div>';
+      }
+      let code = first + middle + last
       document.getElementById("login").style.display = "none";
       document.getElementById("projectBoard").style.display = "none";
-      document.getElementById("projectBoard").style.display = "inline";
-      document.getElementById('projectBoard').innerHTML = codeHTML;
+      document.getElementById("deliveryBoard").style.display = "inline";
+      document.getElementById('deliveryBoard').innerHTML = code;
+    }
+
+    async function readProjects(userID){
+      const query = JSON.stringify({
+        query: `query{
+          ProyectosUsuario(idUsuario:${userID}){
+            id,
+            titulo,
+            descripcion,
+          }
+        }`
+      });
+      const response = await fetch(graphlEndpoint, {
+        headers: { 'content-type': 'application/json' },
+        method: 'POST',
+        body: query,
+      });
+      const responseJson = await response.json();
+      let data = responseJson.data.ProyectosUsuario;
+      console.log(responseJson);
+      return(data);
+    }
+
+    async function readDelivery(projectID){
+      const query = JSON.stringify({
+        query: `query{
+          EntregasDeProyecto(idProyecto:${projectID}){
+            numEntrega,
+            descripcion
+          }
+        }`
+      });
+      const response = await fetch(graphlEndpoint, {
+        headers: { 'content-type': 'application/json' },
+        method: 'POST',
+        body: query,
+      });
+      const responseJson = await response.json();
+      let data = responseJson.data.EntregasDeProyecto;
+      console.log(responseJson);
+      return(data);
     }
 
     const login = async (ev) => {
       ev.preventDefault();
       const email = formLogin.elements["email"].value;
       const pass = formLogin.elements["pass"].value;
-      console.log(email, pass);
-
       const query = JSON.stringify({
-        query: `query {
-        Proyecto(id:${pass})
-        {id,titulo}
-      }`
+        query: `query{
+          Login(email:"${email}", password:"${pass}"){
+            id
+          }
+        }`
       });
-
       const response = await fetch(graphlEndpoint, {
         headers: { 'content-type': 'application/json' },
         method: 'POST',
         body: query,
       });
-
       const responseJson = await response.json();
-      renderProjects();
-      //console.log(responseJson.data);
-
+      let data = responseJson.data.Login;
+      renderProjects(data);
       //form.reset();
     }
 
