@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width" />
   <title>Project Managment</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.0/css/bulma.min.css">
 </head>
+
 <body onload="main()">
   <section class="hero is-light is-fullheight">
     <nav class="breadcrumb has-background-light is-centered" id="navBread" aria-label="breadcrumbs"></nav>
@@ -56,7 +58,7 @@
     // https://www.youtube.com/watch?v=V1Zz2fUuaXI
 
     const graphlEndpoint = `https://vukapi.herokuapp.com/`;
-    
+
     const formLogin = document.querySelector("#loginForm");
     const projectBoard = document.querySelector("#projectBoard");
     const deliveryBoard = document.querySelector("#deliveryBoard");
@@ -70,29 +72,59 @@
     async function renderProjects(user) {
       let projects = await readProjects(user);
       console.log(projects);
-      const first = '<div class="columns"><div class="column is-6 is-offset-3"><div class="box"><p>Agregar proyecto</p></div>';
+      const first = '<div class="columns"><div class="column is-6 is-offset-3"><div class="box boxModalProject" data-modal="modal"><p>Agregar proyecto</p></div>';
       let middle = "";
+      let modal = '<div class="modal modalProject"><div class="modal-background"></div><div class="modal-content"><div class="container"><div class="box"><form id="newProjectForm"><div class="field"><div class="control"><label class="label">Nombre del proyecto</label><div class="control"><input class="input" type="text" id="nombreProyecto" name="nombreProyecto" placeholder="Nombre del proyecto" /></div></div></div><div class="field"><div class="control"><button class="button is-primary is-fullwidth" type="submit">Ingresar</button></div></div></form></div></div></div><button class="modal-close is-large" aria-label="close"></button></div>';
       const last = '</div></div>';
       console.log(projects.length);
-      for(i=0; i<projects.length; i++){
-        middle += '<div class="container pb-2" onclick="renderDeliverys('+projects[i].id+","+user+')"><div class="box"><strong>'+projects[i].nombreProyecto+'</strong><p>'+projects[i].estado+'</p><div class="buttons py-3"><button class="button is-small is-primary">Editar</button><button class="button is-small is-primary">Eliminar</button></div></div></div>';
+      for (i = 0; i < projects.length; i++) {
+        middle += '<div class="container pb-2" onclick="renderDeliverys(' + projects[i].id + "," + user + ')"><div class="box"><strong>' + projects[i].nombreProyecto + '</strong><p>' + projects[i].modelo + '</p><div class="buttons py-3"><button class="button is-small is-primary">Editar</button><button class="button is-small is-primary">Eliminar</button></div></div></div>';
       }
-      let code = first + middle + last
+      let code = first + modal + middle + last
       document.getElementById("login").style.display = "none";
       document.getElementById("navBread").style.display = "none";
       document.getElementById("deliveryBoard").style.display = "none";
       document.getElementById("projectBoard").style.display = "inline";
       document.getElementById('projectBoard').innerHTML = code;
+      modalAddProyect();
     }
 
-    async function renderDeliverys(project,userID) {
+    function modalAddProyect(){
+      //Modal code
+      let buttonModal = document.querySelector('.boxModalProject');
+      const openModal = (OpenModalButton, ModalWindow) => {
+        if (buttonModal.dataset.modal == 'modal') {
+          OpenModalButton.addEventListener('click', () => {
+            ModalWindow.classList.add('is-active')
+          });
+        }
+      }
+
+      const closeModal = (ModalWindow) => {
+        ModalWindow.addEventListener('click', e => {
+          const elementClose = e.target
+          if(elementClose.classList.contains('modal-close') || elementClose.classList.contains('modal-background')){
+            ModalWindow.classList.remove('is-active');
+          }
+        });
+      }
+
+      const Modal = ModalWindow => {
+        openModal(document.querySelector('.boxModalProject'), ModalWindow);
+        closeModal(ModalWindow);
+      }
+
+      Modal(document.querySelector('.modalProject'));
+    }
+
+    async function renderDeliverys(project, userID) {
       let deliverys = await readDelivery(project);
-      let bread = '<div class="container px-3 pt-6"><ul><li><a onclick="renderProjects('+userID+')">Proyectos</a></li><li class="is-active"><a href="#" aria-current="page">Entregas</a></li></ul></div>';
+      let bread = '<div class="container px-3 pt-6"><ul><li><a onclick="renderProjects(' + userID + ')">Proyectos</a></li><li class="is-active"><a href="#" aria-current="page">Entregas</a></li></ul></div>';
       const first = '<div class="columns"><div class="column is-6 is-offset-3"><div class="box"><p>Agregar entrega</p></div>';
       let middle = "";
       const last = '</div></div>';
-      for(i=0; i<deliverys.length; i++){
-        middle += '<div class="container pb-2"><div class="box"><strong>No. Entrega: '+deliverys[i].numEntrega+'</strong><p>'+deliverys[i].observaciones+'</p><div class="buttons py-3"><button class="button is-small is-primary">Editar</button><button class="button is-small is-primary">Eliminar</button></div></div></div>';
+      for (i = 0; i < deliverys.length; i++) {
+        middle += '<div class="container pb-2"><div class="box"><strong>No. Entrega: ' + deliverys[i].numEntrega + '</strong><p>' + deliverys[i].observaciones + '</p><div class="buttons py-3"><button class="button is-small is-primary">Editar</button><button class="button is-small is-primary">Eliminar</button></div></div></div>';
       }
       let code = first + middle + last
       document.getElementById("login").style.display = "none";
@@ -103,7 +135,7 @@
       document.getElementById('deliveryBoard').innerHTML = code;
     }
 
-    async function readProjects(userID){
+    async function readProjects(userID) {
       console.log(userID);
       const query = JSON.stringify({
         query: `query{
@@ -122,10 +154,10 @@
       const responseJson = await response.json();
       let data = responseJson.data.ProyectosUsuario;
       console.log(responseJson);
-      return(data);
+      return (data);
     }
 
-    async function readDelivery(projectID){
+    async function readDelivery(projectID) {
       const query = JSON.stringify({
         query: `query{
           EntregasDeProyecto(idProyecto:${projectID}){
@@ -143,7 +175,7 @@
       const responseJson = await response.json();
       let data = responseJson.data.EntregasDeProyecto;
       console.log(responseJson);
-      return(data);
+      return (data);
     }
 
     const login = async (ev) => {
