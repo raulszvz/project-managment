@@ -3,7 +3,7 @@ const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require("bcryptjs");
 
 //create a database if no exists
-const database = new sqlite3.Database("./db/pm.db");
+const database = new sqlite3.Database("./db/project-managment.db");
 
 //create a table to insert post
 const createUsuarioTable = () => {
@@ -13,7 +13,9 @@ const createUsuarioTable = () => {
         nombre text,
         email text,
         password text,
-        tipo text)`;
+        supervisor text,
+        direccion text,
+        tipo integer)`;
 
     return database.run(query);
 }
@@ -22,12 +24,13 @@ const createProyectoTable = () => {
     const query = `
     CREATE TABLE IF NOT EXISTS proyecto(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        titulo text,
+        nombreProyecto text,
         tipo text,
-        descripcion text,
         modelo text, 
+        km2 text,
         fechaAsignacion text,
         fechaFinal text,
+        estado text,
         idUsuario integer,
         FOREIGN KEY(idUsuario) REFERENCES usuario(id))`;
 
@@ -40,9 +43,8 @@ const createEntregaTable = () => {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             numEntrega integer,
             fechaEntrega text,
-            descripcion text,
+            rasgos text,
             observaciones text,
-            fechaRevision text,
             idProyecto integer,
             FOREIGN KEY(idProyecto) REFERENCES proyecto(id))`;
 
@@ -73,7 +75,9 @@ const UsuarioType = new graphql.GraphQLObjectType({
         nombre: { type: graphql.GraphQLString },
         email: { type: graphql.GraphQLString },
         password: { type: graphql.GraphQLString },
-        tipo: { type: graphql.GraphQLString },
+        supervisor: { type: graphql.GraphQLString },
+        direccion: { type: graphql.GraphQLString },
+        tipo: { type: graphql.GraphQLInt }
     }
 });
 
@@ -81,12 +85,13 @@ const ProyectoType = new graphql.GraphQLObjectType({
     name: 'Proyecto',
     fields:{
         id: { type: graphql.GraphQLID },
-        titulo: { type: graphql.GraphQLString },
+        nombreProyecto: { type: graphql.GraphQLString },
         tipo: { type: graphql.GraphQLString }, 
-        descripcion: { type: graphql.GraphQLString }, 
-        modelo: { type: graphql.GraphQLString }, 
+        modelo: { type: graphql.GraphQLString },
+        km2: { type: graphql.GraphQLString },  
         fechaAsignacion: { type: graphql.GraphQLString }, 
         fechaFinal: { type: graphql.GraphQLString },
+        estado: { type: graphql.GraphQLString },
         idUsuario: { type: graphql.GraphQLInt }
     }
 });
@@ -97,9 +102,8 @@ const EntregaType = new graphql.GraphQLObjectType({
         id: { type: graphql.GraphQLID },
         numEntrega: { type: graphql.GraphQLInt },
         fechaEntrega: { type: graphql.GraphQLString }, 
-        descripcion: { type: graphql.GraphQLString }, 
-        observaciones: { type: graphql.GraphQLString }, 
-        fechaRevision: { type: graphql.GraphQLString }, 
+        rasgos: { type: graphql.GraphQLString }, 
+        observaciones: { type: graphql.GraphQLString },  
         idProyecto: { type: graphql.GraphQLInt }
     }
 });
@@ -261,16 +265,22 @@ var mutationType = new graphql.GraphQLObjectType({
                 password: {
                     type: new graphql.GraphQLNonNull(graphql.GraphQLString)
                 },
-                tipo: {
+                supervisor: {
                     type: new graphql.GraphQLNonNull(graphql.GraphQLString)
                 },
+                direccion: {
+                    type: new graphql.GraphQLNonNull(graphql.GraphQLString)
+                },
+                tipo: {
+                    type: new graphql.GraphQLNonNull(graphql.GraphQLInt)
+                },
             },
-            resolve: async (root, {nombre, email, password, tipo}) => {
+            resolve: async (root, {nombre, email, password, supervisor, direccion, tipo}) => {
                 let pass = await encryptPassword(password)
                 return new Promise((resolve, reject) =>{
-                    database.run('INSERT INTO usuario (nombre, email, password, tipo) VALUES (?,?,?,?);', [nombre, email, pass, tipo], (err) => {
+                    database.run('INSERT INTO usuario (nombre, email, password, supervisor, direccion, tipo) VALUES (?,?,?,?,?,?);', [nombre, email, pass, supervisor, direccion, tipo], (err) => {
                         if(err){
-                            reject(null);
+                            reject(err);
                         }
                         database.get('SELECT last_insert_rowid() as id', (err, row) => {
                             resolve({
@@ -278,6 +288,8 @@ var mutationType = new graphql.GraphQLObjectType({
                                 nombre: nombre,
                                 email: email, 
                                 password: pass,
+                                supervisor: supervisor, 
+                                direccion: direccion,
                                 tipo: tipo
                             })
                         });
@@ -297,14 +309,20 @@ var mutationType = new graphql.GraphQLObjectType({
                 password: {
                     type: new graphql.GraphQLNonNull(graphql.GraphQLString)
                 },
+                supervisor: {
+                    type: new graphql.GraphQLNonNull(graphql.GraphQLString)
+                },
+                direccion: {
+                    type: new graphql.GraphQLNonNull(graphql.GraphQLString)
+                },
                 tipo: {
                     type: new graphql.GraphQLNonNull(graphql.GraphQLString)
                 },
             },
-            resolve: (root, {nombre, email, password, tipo}) => {
+            resolve: (root, {nombre, email, password, supervisor, direccion, tipo}) => {
                 return new Promise((resolve, reject) => {
                     //raw SQLite to update a post in post table
-                    database.run('UPDATE usuario SET nombre = (?), email = (?), password = (?), tipo = (?) WHERE id = (?);', [id, nombre, email, password, tipo], (err) => {
+                    database.run('UPDATE usuario SET nombre = (?), email = (?), password = (?), supervisor = (?), direccion = (?), tipo = (?) WHERE id = (?);', [id, nombre, email, password, supervisor, direccion, tipo], (err) => {
                         if(err) {
                             reject(err);
                         }
@@ -335,16 +353,16 @@ var mutationType = new graphql.GraphQLObjectType({
         createProyecto: {
             type: ProyectoType,
             args: {
-                titulo: {
+                nombreProyecto: {
                     type: new graphql.GraphQLNonNull(graphql.GraphQLString)
                 },
                 tipo: {
                     type: new graphql.GraphQLNonNull(graphql.GraphQLString)
                 },
-                descripcion: {
+                modelo: {
                     type: new graphql.GraphQLNonNull(graphql.GraphQLString)
                 },
-                modelo: {
+                km2: {
                     type: new graphql.GraphQLNonNull(graphql.GraphQLString)
                 },
                 fechaAsignacion: {
@@ -353,25 +371,29 @@ var mutationType = new graphql.GraphQLObjectType({
                 fechaFinal: {
                     type: new graphql.GraphQLNonNull(graphql.GraphQLString)
                 },
+                estado: {
+                    type: new graphql.GraphQLNonNull(graphql.GraphQLString)
+                },
                 idUsuario:{
                     type: new graphql.GraphQLNonNull(graphql.GraphQLInt)
                 },
             },
-            resolve: (root, {titulo, tipo, descripcion, modelo, fechaAsignacion, fechaFinal, idUsuario}) => {
+            resolve: (root, {nombreProyecto, tipo, modelo, km2, fechaAsignacion, fechaFinal, estado, idUsuario}) => {
                 return new Promise((resolve, reject) =>{
-                    database.run('INSERT INTO proyecto (titulo, tipo, descripcion, modelo, fechaAsignacion, fechaFinal, idUsuario) VALUES (?,?,?,?,?,?,?);', [titulo, tipo, descripcion, modelo, fechaAsignacion, fechaFinal, idUsuario], (err) => {
+                    database.run('INSERT INTO proyecto (nombreProyecto, tipo, modelo, km2, fechaAsignacion, fechaFinal, estado, idUsuario) VALUES (?,?,?,?,?,?,?,?);', [nombreProyecto, tipo, modelo, km2, fechaAsignacion, fechaFinal, estado, idUsuario], (err) => {
                         if(err){
                             reject(null);
                         }
                         database.get('SELECT last_insert_rowid() as id', (err, row) => {
                             resolve({
                                 id: row["id"],
-                                titulo: titulo, 
+                                nombreProyecto: nombreProyecto, 
                                 tipo: tipo, 
-                                descripcion: descripcion, 
                                 modelo: modelo,
+                                km2: km2,
                                 fechaAsignacion: fechaAsignacion, 
                                 fechaFinal: fechaFinal,
+                                estado: estado,
                                 idUsuario: idUsuario
                             })
                         });
@@ -385,16 +407,16 @@ var mutationType = new graphql.GraphQLObjectType({
                 id:{
                     type: new graphql.GraphQLNonNull(graphql.GraphQLID)
                 },
-                titulo: {
+                nombreProyecto: {
                     type: new graphql.GraphQLNonNull(graphql.GraphQLString)
                 },
                 tipo: {
                     type: new graphql.GraphQLNonNull(graphql.GraphQLString)
                 },
-                descripcion: {
+                modelo: {
                     type: new graphql.GraphQLNonNull(graphql.GraphQLString)
                 },
-                modelo: {
+                km2: {
                     type: new graphql.GraphQLNonNull(graphql.GraphQLString)
                 },
                 fechaAsignacion: {
@@ -403,14 +425,17 @@ var mutationType = new graphql.GraphQLObjectType({
                 fechaFinal: {
                     type: new graphql.GraphQLNonNull(graphql.GraphQLString)
                 },
-                idUsuario: {
+                estado: {
+                    type: new graphql.GraphQLNonNull(graphql.GraphQLString)
+                },
+                idUsuario:{
                     type: new graphql.GraphQLNonNull(graphql.GraphQLInt)
-                }
+                },
             },
-            resolve: (root, {id, titulo, tipo, descripcion, modelo, fechaAsignacion, fechaFinal, idUsuario}) => {
+            resolve: (root, {id, nombreProyecto, tipo, modelo, km2, fechaAsignacion, fechaFinal, estado, idUsuario}) => {
                 return new Promise((resolve, reject) => {
                     //raw SQLite to update a post in post table
-                    database.run('UPDATE proyecto SET titulo = (?), tipo = (?), descripcion = (?), modelo = (?), fechaAsignacion = (?), fechaFinal = (?), idUsuario = (?) WHERE id = (?);', [id, titulo, tipo, descripcion, modelo, fechaAsignacion, fechaFinal, idUsuario], (err) => {
+                    database.run('UPDATE proyecto SET nombreProyecto = (?), tipo = (?), modelo = (?), km2 = (?), fechaAsignacion = (?), fechaFinal = (?), estado = (?), idUsuario = (?) WHERE id = (?);', [id, nombreProyecto, tipo, modelo, km2, fechaAsignacion, fechaFinal, estado, idUsuario], (err) => {
                         if(err) {
                             reject(err);
                         }
@@ -447,22 +472,19 @@ var mutationType = new graphql.GraphQLObjectType({
                 fechaEntrega: {
                     type: new graphql.GraphQLNonNull(graphql.GraphQLString)
                 },
-                descripcion: {
+                rasgos: {
                     type: new graphql.GraphQLNonNull(graphql.GraphQLString)
                 },
                 observaciones: {
-                    type: new graphql.GraphQLNonNull(graphql.GraphQLString)
-                },
-                fechaRevision: {
                     type: new graphql.GraphQLNonNull(graphql.GraphQLString)
                 },
                 idProyecto: {
                     type: new graphql.GraphQLNonNull(graphql.GraphQLInt)
                 }
             },
-            resolve: (root, {numEntrega, fechaEntrega, descripcion, observaciones, fechaRevision, idProyecto}) => {
+            resolve: (root, {numEntrega, fechaEntrega, rasgos, observaciones, idProyecto}) => {
                 return new Promise((resolve, reject) =>{
-                    database.run('INSERT INTO entrega (numEntrega, fechaEntrega, descripcion, observaciones, fechaRevision, idProyecto) VALUES (?,?,?,?,?,?);', [numEntrega, fechaEntrega, descripcion, observaciones, fechaRevision, idProyecto], (err) => {
+                    database.run('INSERT INTO entrega (numEntrega, fechaEntrega, rasgos, observaciones, idProyecto) VALUES (?,?,?,?,?);', [numEntrega, fechaEntrega, rasgos, observaciones, idProyecto], (err) => {
                         if(err){
                             reject(null);
                         }
@@ -471,9 +493,8 @@ var mutationType = new graphql.GraphQLObjectType({
                                 id: row["id"],
                                 numEntrega: numEntrega, 
                                 fechaEntrega: fechaEntrega, 
-                                descripcion: descripcion, 
+                                rasgos: rasgos, 
                                 observaciones: observaciones, 
-                                fechaRevision: fechaRevision,
                                 idProyecto: idProyecto
                             })
                         });
@@ -493,23 +514,20 @@ var mutationType = new graphql.GraphQLObjectType({
                 fechaEntrega: {
                     type: new graphql.GraphQLNonNull(graphql.GraphQLString)
                 },
-                descripcion: {
+                rasgos: {
                     type: new graphql.GraphQLNonNull(graphql.GraphQLString)
                 },
                 observaciones: {
-                    type: new graphql.GraphQLNonNull(graphql.GraphQLString)
-                },
-                fechaRevision: {
                     type: new graphql.GraphQLNonNull(graphql.GraphQLString)
                 },
                 idProyecto: {
                     type: new graphql.GraphQLNonNull(graphql.GraphQLInt)
                 }
             },
-            resolve: (root, {id, numEntrega, fechaEntrega, descripcion, observaciones, fechaRevision, idProyecto}) => {
+            resolve: (root, {id, numEntrega, fechaEntrega, rasgos, observaciones, idProyecto}) => {
                 return new Promise((resolve, reject) => {
                     //raw SQLite to update a post in post table
-                    database.run('UPDATE entrega SET numEntrega = (?), fechaEntrega = (?), descripcion = (?), observaciones = (?), fechaRevision = (?), idProyecto = (?) WHERE id = (?);', [id, numEntrega, fechaEntrega, descripcion, observaciones, fechaRevision, idProyecto], (err) => {
+                    database.run('UPDATE entrega SET numEntrega = (?), fechaEntrega = (?), rasgos = (?), observaciones = (?), idProyecto = (?) WHERE id = (?);', [id, numEntrega, fechaEntrega, rasgos, observaciones, idProyecto], (err) => {
                         if(err) {
                             reject(err);
                         }

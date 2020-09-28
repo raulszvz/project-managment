@@ -8,6 +8,7 @@
 </head>
 <body onload="main()">
   <section class="hero is-light is-fullheight">
+    <nav class="breadcrumb has-background-light is-centered" id="navBread" aria-label="breadcrumbs"></nav>
     <div class="hero-body">
       <div class="container" id="login">
         <div class="columns is-vcentered">
@@ -61,49 +62,55 @@
     const deliveryBoard = document.querySelector("#deliveryBoard");
 
     function main() {
+      document.getElementById("navBread").style.display = "none";
       document.getElementById("projectBoard").style.display = "none";
       document.getElementById("deliveryBoard").style.display = "none";
     }
 
     async function renderProjects(user) {
-      let projects = await readProjects(user.id);
+      let projects = await readProjects(user);
       console.log(projects);
       const first = '<div class="columns"><div class="column is-6 is-offset-3"><div class="box"><p>Agregar proyecto</p></div>';
       let middle = "";
       const last = '</div></div>';
-      console.log(projects.length)
+      console.log(projects.length);
       for(i=0; i<projects.length; i++){
-        middle += '<div class="container pb-2" onclick="renderDeliverys('+projects[i].id+')"><div class="box"><strong>'+projects[i].titulo+'</strong><p>'+projects[i].descripcion+'</p><div class="buttons py-3"><button class="button is-small is-primary">Editar</button><button class="button is-small is-primary">Eliminar</button></div></div></div>';
+        middle += '<div class="container pb-2" onclick="renderDeliverys('+projects[i].id+","+user+')"><div class="box"><strong>'+projects[i].nombreProyecto+'</strong><p>'+projects[i].estado+'</p><div class="buttons py-3"><button class="button is-small is-primary">Editar</button><button class="button is-small is-primary">Eliminar</button></div></div></div>';
       }
       let code = first + middle + last
       document.getElementById("login").style.display = "none";
+      document.getElementById("navBread").style.display = "none";
+      document.getElementById("deliveryBoard").style.display = "none";
       document.getElementById("projectBoard").style.display = "inline";
       document.getElementById('projectBoard').innerHTML = code;
     }
 
-    async function renderDeliverys(project) {
+    async function renderDeliverys(project,userID) {
       let deliverys = await readDelivery(project);
+      let bread = '<div class="container px-3 pt-6"><ul><li><a onclick="renderProjects('+userID+')">Proyectos</a></li><li class="is-active"><a href="#" aria-current="page">Entregas</a></li></ul></div>';
       const first = '<div class="columns"><div class="column is-6 is-offset-3"><div class="box"><p>Agregar entrega</p></div>';
       let middle = "";
       const last = '</div></div>';
-      console.log(deliverys.length)
       for(i=0; i<deliverys.length; i++){
-        middle += '<div class="container pb-2"><div class="box"><strong>No. Entrega: '+deliverys[i].numEntrega+'</strong><p>'+deliverys[i].descripcion+'</p><div class="buttons py-3"><button class="button is-small is-primary">Editar</button><button class="button is-small is-primary">Eliminar</button></div></div></div>';
+        middle += '<div class="container pb-2"><div class="box"><strong>No. Entrega: '+deliverys[i].numEntrega+'</strong><p>'+deliverys[i].observaciones+'</p><div class="buttons py-3"><button class="button is-small is-primary">Editar</button><button class="button is-small is-primary">Eliminar</button></div></div></div>';
       }
       let code = first + middle + last
       document.getElementById("login").style.display = "none";
       document.getElementById("projectBoard").style.display = "none";
+      document.getElementById("navBread").style.display = "inline";
+      document.getElementById('navBread').innerHTML = bread;
       document.getElementById("deliveryBoard").style.display = "inline";
       document.getElementById('deliveryBoard').innerHTML = code;
     }
 
     async function readProjects(userID){
+      console.log(userID);
       const query = JSON.stringify({
         query: `query{
           ProyectosUsuario(idUsuario:${userID}){
             id,
-            titulo,
-            descripcion,
+            nombreProyecto,
+            modelo
           }
         }`
       });
@@ -123,7 +130,8 @@
         query: `query{
           EntregasDeProyecto(idProyecto:${projectID}){
             numEntrega,
-            descripcion
+            observaciones,
+            idProyecto
           }
         }`
       });
@@ -156,13 +164,14 @@
       });
       const responseJson = await response.json();
       let data = responseJson.data.Login;
-      renderProjects(data);
+      let id = data.id
+      console.log(id);
+      renderProjects(id);
       //form.reset();
     }
 
     formLogin.addEventListener("submit", login);
   </script>
-  <!--<script src="script.js"></script>-->
 </body>
 
 </html>
