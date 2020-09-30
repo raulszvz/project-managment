@@ -1,4 +1,12 @@
 # Project Managment
+
+## Client
+Para usar el cliente basta con abrir el archivo index.html (ubicado en la carpeta client), dicho archivo esta enlazado a la API Graphql de heroku (https://vukapi.herokuapp.com/).
+
+Existe un usuario de prueba
+usuario: r@email.com
+contraseña: 1234
+
 ## API
 
 ### Desplegar en Heroku

@@ -47,8 +47,158 @@
           </div>
         </div>
       </div>
-      <div class="container" id="projectBoard"></div>
-      <div class="container" id="deliveryBoard"></div>
+      <div class="container">
+        <div class="columns">
+          <div class="column is-one-third">
+            <div class="container" id="mdProject">
+              <div class="box">
+                <form id="newProjectForm">
+                  <div class="field">
+                    <div class="control">
+                      <label class="label">Nombre del proyecto</label>
+                      <div class="control">
+                        <input class="input" type="text" id="nombreProyecto" name="nombreProyecto"
+                          placeholder="Nombre del proyecto" />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <div class="control">
+                      <label class="label">Tipo</label>
+                      <div class="control">
+                        <input class="input" type="text" id="tipo" name="tipo" placeholder="Tipo" />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <div class="control">
+                      <label class="label">Modelo</label>
+                      <div class="control">
+                        <input class="input" type="text" id="modelo" name="modelo" placeholder="Modelo" />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <div class="control">
+                      <label class="label">Km2</label>
+                      <div class="control">
+                        <input class="input" type="text" id="km2" name="km2" placeholder="Km2" />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <div class="control">
+                      <label class="label">Fecha de asignación</label>
+                      <div class="control">
+                        <input class="input" type="text" id="fechaAsignacion" name="fechaAsignacion"
+                          placeholder="Fecha de asignación" />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <div class="control">
+                      <label class="label">Fecha fina</label>
+                      <div class="control">
+                        <input class="input" type="text" id="fechaFinal" name="fechaFinal" placeholder="Fecha final" />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <div class="control">
+                      <label class="label">Estado</label>
+                      <div class="control">
+                        <input class="input" type="text" id="estado" name="estado" placeholder="estado" />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <div class="control">
+                      <label class="label">Usuario</label>
+                      <div class="control">
+                        <input class="input" type="text" id="idUsuario" name="idUsuario" placeholder="ID Usuario" />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <div class="control">
+                      <button class="button is-primary is-fullwidth" type="submit">
+                        Guardar
+                      </button>
+                      <button class="button is-primary is-fullwidth" onclick="hideFormProject()">
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+            <div class="container" id="mdDelivery">
+              <div class="box">
+                <form id="newDeliveryForm">
+                  <div class="field">
+                    <div class="control">
+                      <label class="label">Número de entrega</label>
+                      <div class="control">
+                        <input class="input" type="text" id="numEntrega" name="numEntrega"
+                          placeholder="Número de entrega" />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <div class="control">
+                      <label class="label">Fecha de entrega</label>
+                      <div class="control">
+                        <input class="input" type="text" id="fechaEntrega" name="fechaEntrega"
+                          placeholder="Fecha de entrega" />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <div class="control">
+                      <label class="label">Rasgos</label>
+                      <div class="control">
+                        <input class="input" type="text" id="rasgos" name="rasgos" placeholder="Rasgos" />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <div class="control">
+                      <label class="label">Observaciones</label>
+                      <div class="control">
+                        <input class="input" type="text" id="observaciones" name="observaciones"
+                          placeholder="Observaciones" />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <div class="control">
+                      <label class="label">Proyecto</label>
+                      <div class="control">
+                        <input class="input" type="text" id="idProyecto" name="idProyecto" placeholder="ID Proyecto" />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <div class="control">
+                      <button class="button is-primary is-fullwidth" type="submit">
+                        Guardar
+                      </button>
+                      <button class="button is-primary is-fullwidth" onclick="hideFormDelivery()">
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+          <div class="column is-two-third">
+            <div class="container" id="projectBoard">
+            </div>
+            <div class="container" id="deliveryBoard"></div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
   <script>
@@ -60,67 +210,58 @@
     const graphlEndpoint = `https://vukapi.herokuapp.com/`;
 
     const formLogin = document.querySelector("#loginForm");
+    const formProject = document.querySelector("#newProjectForm");
+    const formDelivery = document.querySelector("#newDeliveryForm");
     const projectBoard = document.querySelector("#projectBoard");
     const deliveryBoard = document.querySelector("#deliveryBoard");
 
     function main() {
       document.getElementById("navBread").style.display = "none";
       document.getElementById("projectBoard").style.display = "none";
+      document.getElementById("mdProject").style.display = "none";
+      document.getElementById("mdDelivery").style.display = "none";
       document.getElementById("deliveryBoard").style.display = "none";
+    }
+
+    function showFormDelivery() {
+      document.getElementById("mdDelivery").style.display = "inline";
+    }
+
+    function hideFormDelivery() {
+      document.getElementById("mdDelivery").style.display = "none";
+    }
+
+    function showFormProject() {
+      document.getElementById("mdProject").style.display = "inline";
+    }
+
+    function hideFormProject() {
+      document.getElementById("mdProject").style.display = "none";
     }
 
     async function renderProjects(user) {
       let projects = await readProjects(user);
       console.log(projects);
-      const first = '<div class="columns"><div class="column is-6 is-offset-3"><div class="box boxModalProject" data-modal="modal"><p>Agregar proyecto</p></div>';
+      const first = '<div class="columns"><div class="column is-6 is-offset-3"><div class="box" onclick="showFormProject()"><p>Agregar proyecto</p></div>';
       let middle = "";
-      let modal = '<div class="modal modalProject"><div class="modal-background"></div><div class="modal-content"><div class="container"><div class="box"><form id="newProjectForm"><div class="field"><div class="control"><label class="label">Nombre del proyecto</label><div class="control"><input class="input" type="text" id="nombreProyecto" name="nombreProyecto" placeholder="Nombre del proyecto" /></div></div></div><div class="field"><div class="control"><button class="button is-primary is-fullwidth" type="submit">Ingresar</button></div></div></form></div></div></div><button class="modal-close is-large" aria-label="close"></button></div>';
       const last = '</div></div>';
       console.log(projects.length);
       for (i = 0; i < projects.length; i++) {
         middle += '<div class="container pb-2" onclick="renderDeliverys(' + projects[i].id + "," + user + ')"><div class="box"><strong>' + projects[i].nombreProyecto + '</strong><p>' + projects[i].modelo + '</p><div class="buttons py-3"><button class="button is-small is-primary">Editar</button><button class="button is-small is-primary">Eliminar</button></div></div></div>';
       }
-      let code = first + modal + middle + last
+      let code = first + middle + last
       document.getElementById("login").style.display = "none";
       document.getElementById("navBread").style.display = "none";
+      document.getElementById("mdDelivery").style.display = "none";
       document.getElementById("deliveryBoard").style.display = "none";
       document.getElementById("projectBoard").style.display = "inline";
       document.getElementById('projectBoard').innerHTML = code;
-      modalAddProyect();
-    }
-
-    function modalAddProyect(){
-      //Modal code
-      let buttonModal = document.querySelector('.boxModalProject');
-      const openModal = (OpenModalButton, ModalWindow) => {
-        if (buttonModal.dataset.modal == 'modal') {
-          OpenModalButton.addEventListener('click', () => {
-            ModalWindow.classList.add('is-active')
-          });
-        }
-      }
-
-      const closeModal = (ModalWindow) => {
-        ModalWindow.addEventListener('click', e => {
-          const elementClose = e.target
-          if(elementClose.classList.contains('modal-close') || elementClose.classList.contains('modal-background')){
-            ModalWindow.classList.remove('is-active');
-          }
-        });
-      }
-
-      const Modal = ModalWindow => {
-        openModal(document.querySelector('.boxModalProject'), ModalWindow);
-        closeModal(ModalWindow);
-      }
-
-      Modal(document.querySelector('.modalProject'));
     }
 
     async function renderDeliverys(project, userID) {
       let deliverys = await readDelivery(project);
       let bread = '<div class="container px-3 pt-6"><ul><li><a onclick="renderProjects(' + userID + ')">Proyectos</a></li><li class="is-active"><a href="#" aria-current="page">Entregas</a></li></ul></div>';
-      const first = '<div class="columns"><div class="column is-6 is-offset-3"><div class="box"><p>Agregar entrega</p></div>';
+      const first = '<div class="columns"><div class="column is-6 is-offset-3"><div class="box" onclick="showFormDelivery()"><p>Agregar entrega</p></div>';
       let middle = "";
       const last = '</div></div>';
       for (i = 0; i < deliverys.length; i++) {
@@ -128,6 +269,7 @@
       }
       let code = first + middle + last
       document.getElementById("login").style.display = "none";
+      document.getElementById("mdProject").style.display = "none";
       document.getElementById("projectBoard").style.display = "none";
       document.getElementById("navBread").style.display = "inline";
       document.getElementById('navBread').innerHTML = bread;
@@ -203,6 +345,85 @@
     }
 
     formLogin.addEventListener("submit", login);
+
+    const createProject = async (ev) => {
+      ev.preventDefault();
+      const nombreProyecto = formProject.elements["nombreProyecto"].value;
+      const tipo = formProject.elements["tipo"].value;
+      const modelo = formProject.elements["modelo"].value;
+      const km2 = formProject.elements["km2"].value;
+      const fechaAsignacion = formProject.elements["fechaAsignacion"].value;
+      const fechaFinal = formProject.elements["fechaFinal"].value;
+      const estado = formProject.elements["estado"].value;
+      const idUsuario = formProject.elements["idUsuario"].value;
+      console.log(nombreProyecto);
+      const query = JSON.stringify({
+        query: `mutation{
+          createProyecto(
+            nombreProyecto: "${nombreProyecto}",
+            tipo: "${tipo}",
+            modelo: "${modelo}",
+            km2: "${km2}",
+            fechaAsignacion: "${fechaAsignacion}",
+            fechaFinal: "${fechaFinal}",
+            estado: "${estado}",
+            idUsuario: ${idUsuario},
+          ){
+            id
+          }
+        }`
+      });
+      console.log(query);
+      const response = await fetch(graphlEndpoint, {
+        headers: { 'content-type': 'application/json' },
+        method: 'POST',
+        body: query,
+      });
+      const responseJson = await response.json();
+      renderProjects(1);
+      console.log('Operacion exitosa, proyecto: ', responseJson.data)
+      document.getElementById("mdProject").style.display = "none";
+      form.reset();
+    }
+
+    formProject.addEventListener("submit", createProject);
+
+    const createDelivery = async (ev) => {
+      ev.preventDefault();
+      const numEntrega = formDelivery.elements["numEntrega"].value;
+      const fechaEntrega = formDelivery.elements["fechaEntrega"].value;
+      const rasgos = formDelivery.elements["rasgos"].value;
+      const observaciones = formDelivery.elements["observaciones"].value;
+      const idProyecto = formDelivery.elements["idProyecto"].value;
+
+      console.log(nombreProyecto);
+      const query = JSON.stringify({
+        query: `mutation{
+          createEntrega(
+            numEntrega: ${ numEntrega }
+            fechaEntrega: "${ fechaEntrega }"
+            rasgos: "${ rasgos }"
+            observaciones: "${ observaciones }"
+            idProyecto: ${ idProyecto }
+          ){
+            id
+          }
+        }`
+      });
+      console.log(query);
+      const response = await fetch(graphlEndpoint, {
+        headers: { 'content-type': 'application/json' },
+        method: 'POST',
+        body: query,
+      });
+      const responseJson = await response.json();
+      renderProjects(1);
+      console.log('Operacion exitosa, entrega: ', responseJson.data)
+      document.getElementById("mdDelivery").style.display = "none";
+    }
+
+    formDelivery.addEventListener("submit", createDelivery);
+
   </script>
 </body>
 
